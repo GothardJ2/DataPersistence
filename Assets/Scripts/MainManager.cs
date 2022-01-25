@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -12,16 +13,33 @@ public class MainManager : MonoBehaviour
 
     public Text ScoreText;
     public GameObject GameOverText;
-    
+    public Text userNameText;
+    public Text highScoreText;
+    public int m_highScore;
+
+
     private bool m_Started = false;
     private int m_Points;
     
     private bool m_GameOver = false;
 
     
+
+    
     // Start is called before the first frame update
     void Start()
     {
+        
+        DisplayHighScore();
+
+        if (GameManger.instance != null)
+        {
+            //Debug.Log("Not Null");
+            SetUsername(GameManger.instance.userName);
+        }
+        
+       
+
         const float step = 0.6f;
         int perLine = Mathf.FloorToInt(4.0f / step);
         
@@ -36,6 +54,8 @@ public class MainManager : MonoBehaviour
                 brick.onDestroyed.AddListener(AddPoint);
             }
         }
+        
+
     }
 
     private void Update()
@@ -51,6 +71,7 @@ public class MainManager : MonoBehaviour
 
                 Ball.transform.SetParent(null);
                 Ball.AddForce(forceDir * 2.0f, ForceMode.VelocityChange);
+                
             }
         }
         else if (m_GameOver)
@@ -62,6 +83,11 @@ public class MainManager : MonoBehaviour
         }
     }
 
+    public void ReturnToMenu()
+    {
+        SceneManager.LoadScene(0);
+    }
+ 
     void AddPoint(int point)
     {
         m_Points += point;
@@ -70,7 +96,31 @@ public class MainManager : MonoBehaviour
 
     public void GameOver()
     {
+        if (m_Points > m_highScore)
+        {
+            GameManger.instance.SaveHighScore(m_Points);
+            
+        }
         m_GameOver = true;
         GameOverText.SetActive(true);
     }
+
+    public void SetUsername(string name)
+    {
+        string userName = name;
+        userNameText.text = "Name: "+ userName;
+    }
+
+    public void DisplayHighScore()
+    {
+        m_highScore = GameManger.instance.scoreText;
+        highScoreText.text = "Best Score: "+ m_highScore;
+    }
+
+
+    
+
+
+
+
 }
